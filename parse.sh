@@ -9,28 +9,18 @@ replace_dir(){
 	str=${str%/*}"/.."
 	#echo $str
 }
+
+copy_link_src_file () {
+	local file_arr=$1|tr "\n" " "
+	local src_file=${file_arr[0]}
+	local dst_file=${file_arr[1]}
+	local dst_abs_path=$(cd $(dirname $dst_file);pwd)
+	rm -rf $dst_file
+	$(cd $dst_abs_path;cp -rf $src_file .)
+}
+
 while read line
 do
-#	echo $line
-	link=${line#* }
-	src=${line% *}
-	link_dir=${link%/*}
-	replace_dir $link_dir
-#	echo $link
-#	echo $src
-#	echo $link_dir
-	src=${src/$str/.}
-:<<EOF
-if [ -f $src ]
-then
-	#echo "cp $src $link_dir"
-	mv $link ${link}.zy
-	#echo "mv $src ${src}.zy"
-	cp -R $src $link_dir
-else
-	echo "$src is a dir"
-fi
-EOF
-	rm $link
-	cp -R $src $link_dir
+	file_arr=($line)
+	copy_link_src_file ${file_arr[*]}
 done < $1
